@@ -8,6 +8,7 @@ acl "<%= key %>" {
         <%= line %>;
 <% end -%>
 };
+
 <% end -%>
 <% end -%><%# end of acls -%>
 <% if !@keys.empty? -%>
@@ -17,6 +18,7 @@ key "<%= key %>" {
         <%= line %>;
 <% end -%>
 };
+
 <% end -%>
 <% end -%><%# end keys -%>
 <% if !@masters.empty? -%>
@@ -26,6 +28,7 @@ masters "<%= key %>" {
         <%= line %>;
 <% end -%>
 };
+
 <% end -%>
 <% end -%><%# end of masters -%>
 options {
