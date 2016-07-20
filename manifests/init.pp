@@ -21,7 +21,7 @@
 #   Array of forwarders IP addresses. Default: empty
 #  $directory:
 #   Base directory for the BIND server. Default: '/var/named'
-#  $hostname:
+#  $host_name:
 #   Hostname returned for hostname.bind TXT in CHAOS. Set to 'none' to disable.
 #   Default: undef, bind internal default
 #  $server_id:

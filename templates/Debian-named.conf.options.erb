@@ -29,7 +29,7 @@ masters <%= key %> {
 <% end -%>
 <% end -%><%# end of masters -%>
 options {
-        directory ""<%= @data_dir %>";
+        directory "<%= @data_dir %>";
 <% if @dump_file -%>
         dump-file       "<%= @data_dir %>/data/<%= @dump_file %>";
 <% end -%>
@@ -39,8 +39,8 @@ options {
 <% if @mem_stats_file -%>
         memstatistics-file "<%= @data_dir %>/data/<%= @mem_stats_file %>";
 <% end -%>
-<% if @hostname -%>
-    	hostname "<%= @hostname %>";
+<% if @host_name -%>
+    	hostname "<%= @host_name %>";
 <% end -%>
 <% if @server_id -%>
     	server-id "<% @server_id.each_byte do |byte| -%><%= byte.to_s(base=16) %><% end -%>";

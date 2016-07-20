@@ -4,7 +4,7 @@ class bind::params {
   $acls                   = {}
   $masters                = {}
   $forwarders             = []
-  $hostname               = undef
+  $host_name              = undef
   $server_id              = undef
   $version                = undef
   $allow_query_cache      = []
