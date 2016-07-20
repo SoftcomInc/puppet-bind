@@ -1,0 +1,180 @@
+// WARNING!
+// This file managed by puppet
+//
+// named.conf
+//
+// Provided by Red Hat bind package to configure the ISC BIND named(8) DNS
+// server as a caching only nameserver (as a localhost DNS resolver only).
+//
+// See /usr/share/doc/bind*/sample/ for example named configuration files.
+//
+
+<% if !@acls.empty? -%>
+<% @acls.sort_by {|key, value| key}.each do |key,value| -%>
+acl <%= key %> {
+<% value.each do |line| -%>
+        <%= line %>;
+<% end -%>
+};
+<% end -%>
+<% end -%>
+
+<% if !@keys.empty? -%>
+<% @keys.sort_by {|key, value| key}.each do |key,value| -%>
+key "<%= key %>" {
+<% value.each do |line| -%>
+        <%= line %>;
+<% end -%>
+};
+<% end -%>
+<% end -%>
+
+<% if !@masters.empty? -%>
+<% @masters.sort_by {|key, value| key}.each do |key,value| -%>
+masters <%= key %> {
+<% value.each do |line| -%>
+        <%= line %>;
+<% end -%>
+};
+<% end -%>
+<% end -%>
+
+options {
+        listen-on port <%= @listen_on_port %> { <%= @listen_on_addr.join("; ") %>; };
+        listen-on-v6 port <%= @listen_on_v6_port %> { <%= @listen_on_v6_addr.join("; ") %>; };
+        <% if !@forwarders.empty? -%>
+        forwarders { <%= @forwarders.join("; ") %>; };
+        <% end -%>
+        directory       "<%= @data_dir %>";
+        <% if @dump_file -%>
+        dump-file       "<%= @data_dir %>/data/<%= @dump_file %>";
+        <% end -%>
+        <% if @stats_file -%>
+        statistics-file "<%= @data_dir %>/data/<%= @stat_file %>";
+        <% end -%>
+        <% if @mem_stats_file -%>
+        memstatistics-file "<%= @data_dir %>/data/<%= @mem_stats_file %>";
+        <% end -%>
+	<% if !@allow_query.empty? -%>
+        allow-query     { <%= @allow_query.join("; ") %>; };
+	<% end -%>
+        <% if !@allow_query_cache.empty? -%>
+        allow-query-cache { <%= @allow_query_cache.join("; ") %>; };
+        <% end -%>
+
+        <% if @hostname -%>
+        hostname "<%= @hostname %>";
+        <% end -%>
+        <% if @server_id -%>
+        server-id "<% @server_id.each_byte do |byte| -%><%= byte.to_s(base=16) %><% end -%>";
+        <% end -%>
+        <% if @version -%>
+        version "<%= @version %>";
+        <% end -%>
+
+        /*
+         - If you are building an AUTHORITATIVE DNS server, do NOT enable recursion.
+         - If you are building a RECURSIVE (caching) DNS server, you need to enable
+           recursion.
+         - If your recursive DNS server has a public IP address, you MUST enable access
+           control to limit queries to your legitimate users. Failing to do so will
+           cause your server to become part of large scale DNS amplification
+           attacks. Implementing BCP38 within your network would greatly
+           reduce such attack surface
+        */
+        recursion <%= @recursion %>;
+        <% if !@allow_recursion.empty? -%>
+        allow-recursion { <%= @allow_recursion.join("; ") %>; };
+        <% end -%>
+        <% if !@allow_transfer.empty? -%>
+        allow-transfer { <%= @allow_transfer.join("; ") %>; };
+        <% end -%>
+        <% if !@check_names.empty? -%>
+        <% @check_names.each do |line| -%>
+        check-names <%= line %>;
+        <% end -%>
+        <% end -%>
+        <% if !@extra_options.empty? -%>
+        <% @extra_options.sort_by {|key, value| key}.each do |key,value| -%>
+        <%= key %> <%= value %>;
+        <% end -%>
+        <% end -%>
+
+        dnssec-enable <%= @dnssec_enable %>;
+        dnssec-validation <%= @dnssec_validation %>;
+        <% if !@dnssec_lookaside.empty? -%>
+        dnssec-lookaside <%= @dnssec_lookaside %>;
+        <% end -%>
+
+        /* Path to ISC DLV key */
+        bindkeys-file "<%= @conf_dir %><%= @bind_keys_file %>";
+
+        managed-keys-directory "<%= @managed_keys_dir %>";
+
+        pid-file "/run/named/named.pid";
+        session-keyfile "/run/named/session.key";
+};
+
+logging {
+        channel default_debug {
+                file "data/named.run";
+                severity dynamic;
+        };
+};
+
+<% if !@views.empty? -%>
+<% @views.sort_by {|key,value| key}.each do |key,value| -%>
+<% valid_keys = %w(allow-notify allow-query allow-recursion allow-transfer allow-update-forwarding forwarders match-clients match-destinations match-recursive-only) -%>
+view "<%= key %>" {
+        <% valid_keys.sort.each do |valid_key| -%>
+        <% if value[valid_key] and !value[valid_key].empty? -%>
+        <%= valid_key %> { <%= value[valid_key].join('; ') %>; };
+        <% end -%>
+        <% end -%>
+        <% if value['includes'] and !value['includes'].empty? -%>
+        <% value['includes'].each do |filename| -%>
+        include "<%= filename %>";
+        <% end -%>
+        <% end -%>
+        <% if value['zones'] and !value['zones'].empty? -%>
+        /* View specific zones */
+        <% value['zones'].sort_by {|key, value| key}.each do |key,value| -%>
+        zone "<%= key %>" IN {
+                <% value.each do |line| -%>
+                <%= line %>;
+                <% end -%>
+        };
+        <% end -%>
+        <% end -%>
+
+        <% if !@zones.empty? -%>
+        /* Global zones */
+        <% @zones.sort_by {|key, value| key}.each do |key,value| -%>
+        zone "<%= key %>" IN {
+                <% value.each do |line| -%>
+                <%= line %>;
+                <% end -%>
+        };
+        <% end -%>
+        <% end -%>
+};
+<% end -%>
+<% else -%><%# end views, start no views -%>
+<% if @recursion == 'yes' -%>
+zone "." IN {
+        type hint;
+        file "named.ca";
+};
+<% end -%>
+
+<% if @recursion == 'yes' -%>
+include "/etc/named.rfc1912.zones";
+<% end -%>
+<% end -%><%# end no views -%>
+include "/etc/named.root.key";
+<% if !@includes.empty? -%>
+<% @includes.each do |filename| -%>
+include "<%= filename %>";
+<% end -%>
+<% end -%>
+

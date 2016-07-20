@@ -1,21 +1,14 @@
-# Class: bind::service
-#
-class bind::service (
-  $servicename,
-  $service_reload,
-) inherits ::bind::params {
+class bind::service inherits bind {
 
-  if $service_reload {
-    Service[$servicename] {
-      restart => "service ${servicename} reload",
-    }
+  if ! ($service_ensure in [ 'running', 'stopped' ]) {
+    fail('service_ensure parameter must be running or stopped')
   }
 
-  service { $servicename:
-    ensure    => 'running',
-    enable    => true,
-    hasstatus => true,
-    require   => Class['bind::package'],
+  service { $service_name:
+    ensure     => $service_ensure,
+    enable     => $service_enable,
+    hasstatus  => true,
+    hasrestart => true,
   }
   
 }

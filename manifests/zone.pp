@@ -1,4 +1,4 @@
-# Define: bind::server::file
+# Define: bind::zone
 #
 # ISC BIND server template-based or pre-created zone file definition.
 # Either of $source or $content must be specificed when using it.
@@ -28,25 +28,17 @@
 #    source  => 'puppet:///files/dns/example.com',
 #  }
 #
-define bind::server::file (
-  $zonedir     = '/var/named',
-  $owner       = 'root',
-  $group       = undef,
+define bind::zone (
+  $zonedir     = $::bind::params::conf_dir,
+  $owner       = $::bind::params::bind_user,
+  $group       = $::bind::params::bind_group,
   $mode        = '0640',
   $dirmode     = '0750',
   $source      = undef,
   $source_base = undef,
   $content     = undef,
   $ensure      = undef,
-) {
-
-  include '::bind::params'
-
-  if $group {
-    $bindgroup = $group
-  } else {
-    $bindgroup = $::bind::params::bindgroup
-  }
+) inherits ::bind::params {
 
   if $source      { $zone_source = $source }
   if $source_base { $zone_source = "${source_base}${title}" }
@@ -55,7 +47,7 @@ define bind::server::file (
     file { $zonedir:
       ensure => directory,
       owner  => $owner,
-      group  => $bindgroup,
+      group  => $group,
       mode   => $dirmode,
     }
   }
@@ -63,14 +55,14 @@ define bind::server::file (
   file { "${zonedir}/${title}":
     ensure  => $ensure,
     owner   => $owner,
-    group   => $bindgroup,
+    group   => $group,
     mode    => $mode,
     source  => $zone_source,
     content => $content,
-    notify  => Class['::bind::service'],
+    notify  => Service["$service_name"],
     # For the parent directory
     require => [
-      Class['::bind::package'],
+      Class['::bind::install'],
       File[$zonedir],
     ],
   }

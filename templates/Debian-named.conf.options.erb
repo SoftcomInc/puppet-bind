@@ -1,0 +1,119 @@
+// WARNING!
+// This file managed by puppet
+
+<% if !@acls.empty? -%>
+<% @acls.sort_by {|key, value| key}.each do |key,value| -%>
+acl <%= key %> {
+<% value.each do |line| -%>
+        <%= line %>;
+<% end -%>
+};
+<% end -%>
+<% end -%>
+
+<% if !@keys.empty? -%>
+<% @keys.sort_by {|key, value| key}.each do |key,value| -%>
+key "<%= key %>" {
+<% value.each do |line| -%>
+        <%= line %>;
+<% end -%>
+};
+<% end -%>
+<% end -%>
+
+<% if !@masters.empty? -%>
+<% @masters.sort_by {|key, value| key}.each do |key,value| -%>
+masters <%= key %> {
+<% value.each do |line| -%>
+        <%= line %>;
+<% end -%>
+};
+<% end -%>
+<% end -%>
+
+options {
+        directory ""<%= @data_dir %>";
+        <% if @dump_file -%>
+        dump-file       "<%= @data_dir %>/data/<%= @dump_file %>";
+        <% end -%>
+        <% if @stats_file -%>
+        statistics-file "<%= @data_dir %>/data/<%= @stat_file %>";
+        <% end -%>
+        <% if @mem_stats_file -%>
+        memstatistics-file "<%= @data_dir %>/data/<%= @mem_stats_file %>";
+        <% end -%>
+
+	<% if @hostname -%>
+    	hostname "<%= @hostname %>";
+	<% end -%>
+	<% if @server_id -%>
+    	server-id "<% @server_id.each_byte do |byte| -%><%= byte.to_s(base=16) %><% end -%>";
+	<% end -%>
+	<% if @version -%>
+    	version "<%= @version %>";
+	<% end -%>
+
+        // If there is a firewall between you and nameservers you want
+        // to talk to, you may need to fix the firewall to allow multiple
+        // ports to talk.  See http://www.kb.cert.org/vuls/id/800113
+
+        // If your ISP provided one or more IP addresses for stable
+        // nameservers, you probably want to use them as forwarders.
+        // Uncomment the following block, and insert the addresses replacing
+        // the all-0's placeholder.
+
+	<% if !@forwarders.empty? -%>
+	forwarders { 
+	<% @forwarders.each do |forwarder| -%>
+		<%= forwarder %>;
+	<% end -%>
+	<% else -%>
+        // forwarders {
+        //      0.0.0.0;
+        // };
+	<% end -%>
+
+        <% if !@allow_query.empty? -%>
+        allow-query     { <%= @allow_query.join("; ") %>; };
+        <% end -%>
+        <% if !@allow_query_cache.empty? -%>
+        allow-query-cache { <%= @allow_query_cache.join("; ") %>; };
+        <% end -%>
+        recursion <%= @recursion %>;
+        <% if !@allow_recursion.empty? -%>
+        allow-recursion { <%= @allow_recursion.join("; ") %>; };
+        <% end -%>
+        <% if !@allow_transfer.empty? -%>
+        allow-transfer { <%= @allow_transfer.join("; ") %>; };
+        <% end -%>
+        <% if !@check_names.empty? -%>
+        <% @check_names.each do |line| -%>
+        check-names <%= line %>;
+        <% end -%>
+        <% end -%>
+
+
+        //========================================================================
+        // If BIND logs error messages about the root key being expired,
+        // you will need to update your keys.  See https://www.isc.org/bind-keys
+        //========================================================================
+        <% if !@dnssec_enable.empty? -%>
+        dnssec-enable <%= @dnssec_enable %>;
+        <% end -%>
+        dnssec-validation <%= @dnssec_validation %>;
+        <% if !@dnssec_lookaside.empty? -%>
+        dnssec-lookaside <%= @dnssec_lookaside %>;
+        <% end -%>
+
+        auth-nxdomain no;    # conform to RFC1035
+        <% if !@listen_on_addr.empty? -%>
+        listen-on { <%= @listen_on_addr.join("; ") %>; };
+        <% end -%>
+        listen-on-v6 { <%= @listen_on_v6_addr.join("; ") %>; };
+
+        <% if !@extra_options.empty? -%>
+        <% @extra_options.sort_by {|key, value| key}.each do |key,value| -%>
+        <%= key %> <%= value %>;
+        <% end -%>
+        <% end -%>
+};

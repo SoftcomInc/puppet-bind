@@ -1,0 +1,49 @@
+// WARNING!
+// This file managed by puppet
+//
+// Do any local configuration here
+//
+
+<% if !@views.empty? -%>
+<% @views.sort_by {|key,value| key}.each do |key,value| -%>
+<% valid_keys = %w(allow-notify allow-query allow-recursion allow-transfer allow-update-forwarding forwarders match-clients match-destinations match-recursive-only) -%>
+view "<%= key %>" {
+        <% valid_keys.sort.each do |valid_key| -%>
+        <% if value[valid_key] and !value[valid_key].empty? -%>
+        <%= valid_key %> { <%= value[valid_key].join('; ') %>; };
+        <% end -%>
+        <% end -%>
+        <% if value['includes'] and !value['includes'].empty? -%>
+        <% value['includes'].each do |filename| -%>
+        include "<%= filename %>";
+        <% end -%>
+        <% end -%>
+        <% if value['zones'] and !value['zones'].empty? -%>
+        /* View specific zones */
+        <% value['zones'].sort_by {|key, value| key}.each do |key,value| -%>
+        zone "<%= key %>" IN {
+                <% value.each do |line| -%>
+                <%= line %>;
+                <% end -%>
+        };
+        <% end -%>
+        <% end -%>
+
+        <% if !@zones.empty? -%>
+        /* Global zones */
+        <% @zones.sort_by {|key, value| key}.each do |key,value| -%>
+        zone "<%= key %>" IN {
+                <% value.each do |line| -%>
+                <%= line %>;
+                <% end -%>
+        };
+        <% end -%>
+        <% end -%>
+};
+<% end -%>
+<% else -%><%# end views, start no views -%>
+<% end -%><%# end no views -%>
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
