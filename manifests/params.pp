@@ -45,7 +45,7 @@ class bind::params {
       } else {
         $package_name = 'bind'
       }
-      if $chroot == true and versioncmp($::operatingsystemrelease, '7') >= 0
+      if $chroot == true and versioncmp($::operatingsystemrelease, '7') >= 0 {
         $service_name = 'named-chroot'
       } else {
         $service_name = 'named'
