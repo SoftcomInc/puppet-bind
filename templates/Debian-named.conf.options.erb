@@ -3,9 +3,9 @@
 
 <% if !@acls.empty? -%>
 <% @acls.sort_by {|key, value| key}.each do |key,value| -%>
-acl <%= key %> {
+acl "<%= key %>" {
 <% value.each do |line| -%>
-<%= line %>;
+        <%= line %>;
 <% end -%>
 };
 <% end -%>
@@ -14,16 +14,16 @@ acl <%= key %> {
 <% @keys.sort_by {|key, value| key}.each do |key,value| -%>
 key "<%= key %>" {
 <% value.each do |line| -%>
-<%= line %>;
+        <%= line %>;
 <% end -%>
 };
 <% end -%>
 <% end -%><%# end keys -%>
 <% if !@masters.empty? -%>
 <% @masters.sort_by {|key, value| key}.each do |key,value| -%>
-masters <%= key %> {
+masters "<%= key %>" {
 <% value.each do |line| -%>
-<%= line %>;
+        <%= line %>;
 <% end -%>
 };
 <% end -%>
