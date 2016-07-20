@@ -97,11 +97,11 @@ options {
         // If BIND logs error messages about the root key being expired,
         // you will need to update your keys.  See https://www.isc.org/bind-keys
         //========================================================================
-        <% if !@dnssec_enable.empty? -%>
+        <% if @dnssec_enable -%>
         dnssec-enable <%= @dnssec_enable %>;
         <% end -%>
         dnssec-validation <%= @dnssec_validation %>;
-        <% if !@dnssec_lookaside.empty? -%>
+        <% if @dnssec_lookaside -%>
         dnssec-lookaside <%= @dnssec_lookaside %>;
         <% end -%>
 
