@@ -1,4 +1,4 @@
-define bind::config inherits bind {
+class bind::config inherits bind {
 
   case $::osfamily {
     'RedHat': {
